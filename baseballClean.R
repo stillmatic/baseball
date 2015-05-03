@@ -1,5 +1,7 @@
 # mlb hall of fame classification analysis
 # chua@wharton.upenn.edu
+# this code got very messy, sorry.
+
 
 rm(list=ls())
 par(mfrow=c(1,1)) 
@@ -7,7 +9,7 @@ par(mfrow=c(1,1))
 if (!require("pacman")) install.packages("pacman")
 pacman::p_load("Lahman", "dplyr", "ggplot2")
 
-setwd("~/471") # wharton
+#setwd("~/471") # wharton
 
 # get career batting totals
 batting <- summarize(group_by(Batting, playerID), numYears=length(unique(yearID)),
@@ -235,6 +237,13 @@ table(test$inducted,predTable)
 fit2.error = sum((test[, "inducted"]-pred)^2)
 sum(test$inducted!=(as.numeric(predTable)-1)) # num wrong
 
+testf <- predict(pca2, futures)
+predf <- predict(fit2, newdata=data.frame(testf), type="response")  
+predTablef <- factor(ifelse(predf >= 0.2, "Y", "N"))
+table(futures$inducted, predTablef)
+futures[which(futures$inducted == 1), ]
+futures[which(predTablef == 'Y'), ]
+
 ##### TREE WITH 25% HOLDOUT
 pacman::p_load("tree")
 
@@ -268,7 +277,7 @@ fit6.pred=as.numeric(predict(fit6, test))-1
 test6.error = sum((test[, "inducted"]-fit6.pred)^2)
 test6.error
 
-##### RANDOM FOREST OF PCA'S
+##### KNN
 pacman::p_load("class")
 train.s = scale(train)
 test.s = scale(test)
